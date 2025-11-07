@@ -1,5 +1,6 @@
 # EULA folder - contains large markdown files
 EULA/
+/EULA
 
 # Python
 __pycache__/
