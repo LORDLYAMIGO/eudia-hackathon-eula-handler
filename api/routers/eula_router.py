@@ -115,7 +115,7 @@ async def get_versions(
     return result
 
 
-@router.post("/version/{domain}")
+@router.post("/fetch/{domain}")
 async def fetch_multiple_versions(
     domain: str,
     data: VersionFetchRequest
