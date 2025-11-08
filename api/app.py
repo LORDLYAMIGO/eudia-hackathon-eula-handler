@@ -32,3 +32,6 @@ app.include_router(eula_router.router)
 @app.get("/")
 async def health_check():
     return "The health check is successful!"
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host=HOST, port=PORT, reload=True)
