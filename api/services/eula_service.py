@@ -220,3 +220,98 @@ class EULAService:
                 }
             }
         }
+    
+    def get_versions(self, domain: str) -> Dict[str, any]:
+        """
+        Get all available versions (filenames) for a domain.
+        Privacy Policy gets priority over Terms of Service.
+        
+        Args:
+            domain: The domain name (e.g., 'chatgpt.com', 'https://google.com')
+        
+        Returns:
+            Dict with 'versions' key containing list of version filenames (without .md extension)
+        """
+        # Extract and find domain
+        clean_domain = self.extract_domain(domain)
+        domain_folder = self.find_domain_folder(clean_domain)
+        
+        if not domain_folder:
+            return {
+                "error": f"Domain '{domain}' not found in EULA database",
+                "domain_extracted": clean_domain
+            }
+        
+        # Check for Privacy Policy first (priority)
+        privacy_policy_path = domain_folder / "Privacy Policy"
+        if privacy_policy_path.exists() and privacy_policy_path.is_dir():
+            md_files = self.get_markdown_files_sorted(privacy_policy_path)
+            if md_files:
+                versions = [f.stem for f in md_files]  # Get filename without .md extension
+                return {
+                    "versions": versions,
+                    "domain": clean_domain,
+                    "document_type": "Privacy Policy"
+                }
+        
+        # If no Privacy Policy, check Terms of Service
+        tos_path = domain_folder / "Terms of Service"
+        if tos_path.exists() and tos_path.is_dir():
+            md_files = self.get_markdown_files_sorted(tos_path)
+            if md_files:
+                versions = [f.stem for f in md_files]  # Get filename without .md extension
+                return {
+                    "versions": versions,
+                    "domain": clean_domain,
+                    "document_type": "Terms of Service"
+                }
+        
+        return {
+            "error": f"No Privacy Policy or Terms of Service found for domain '{clean_domain}'",
+            "domain_folder": str(domain_folder)
+        }
+    
+    def get_version_by_filename(self, domain: str, version: str) -> Dict[str, any]:
+        """
+        Get a specific version of EULA by filename.
+        
+        Args:
+            domain: The domain name (e.g., 'chatgpt.com', 'https://google.com')
+            version: The version filename (e.g., '2024-01-15T10-30-00Z')
+        
+        Returns:
+            Dict with 'EULA' key containing the markdown content
+        """
+        # Extract and find domain
+        clean_domain = self.extract_domain(domain)
+        domain_folder = self.find_domain_folder(clean_domain)
+        
+        if not domain_folder:
+            return {
+                "error": f"Domain '{domain}' not found in EULA database",
+                "domain_extracted": clean_domain
+            }
+        
+        # Check Privacy Policy first (priority)
+        for doc_type in ["Privacy Policy", "Terms of Service"]:
+            doc_path = domain_folder / doc_type
+            if doc_path.exists() and doc_path.is_dir():
+                # Try to find the file with .md extension
+                version_file = doc_path / f"{version}.md"
+                if version_file.exists():
+                    content = self.read_markdown_file(version_file)
+                    return {
+                        "EULA": content,
+                        "metadata": {
+                            "domain": clean_domain,
+                            "document_type": doc_type,
+                            "version": version,
+                            "file_name": version_file.name
+                        }
+                    }
+        
+        return {
+            "error": f"Version '{version}' not found for domain '{clean_domain}'",
+            "domain": clean_domain,
+            "version": version
+        }
