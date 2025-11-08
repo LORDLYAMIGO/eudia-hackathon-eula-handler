@@ -13,7 +13,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -24,21 +24,6 @@ app.include_router(eula_router.router)
 
 
 @app.get("/")
-async def root():
-    """Root endpoint with API information"""
-    return {
-        "message": "Welcome to EULA Handler API",
-        "version": "1.0.0",
-        "endpoints": {
-            "/eula/latest": "Get the latest EULA document for a domain",
-            "/eula/archive": "Get all archived EULA documents for a domain",
-            "/docs": "Interactive API documentation (Swagger UI)",
-            "/redoc": "Alternative API documentation (ReDoc)"
-        }
-    }
-
-
-@app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
