@@ -1,7 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import eula_router
-import uvicorn
+import uvicorn, os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+HOST: str = os.getenv("HOST", "127.0.0.1")
+PORT: int = int(os.getenv("PORT", 5001))
 
 # Create FastAPI app
 app = FastAPI(
@@ -30,4 +36,4 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=5001, reload=True)
+    uvicorn.run("app:app", host=HOST, port=PORT)
